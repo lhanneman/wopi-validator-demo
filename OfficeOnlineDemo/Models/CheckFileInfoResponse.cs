@@ -38,6 +38,7 @@ namespace OfficeOnlineDemo.Models
             SupportsGetLock = true;
             SupportsRename = true;
             SupportsUserInfo = true;
+            SupportsDeleteFile = true;
 
             IsAnonymousUser = false;
             return this;
