@@ -19,11 +19,6 @@ namespace OfficeOnlineDemo.Handlers
         public WopiResponse Handle()
         {
             var requestData = WopiRequest.ParseRequest(_request);
-            if (!ValidationHelper.ValidateAccess(requestData.AccessToken, writeAccessRequired: true))
-            {
-                return new WopiResponse() { ResponseType = WopiResponseType.InvalidToken, Message = "Invalid Token" };
-            }
-
             var documentId = Convert.ToInt64(requestData.Id);
             var document = FB.GetDocument(documentId);
 
@@ -78,11 +73,6 @@ namespace OfficeOnlineDemo.Handlers
         public WopiResponse HandleRefresh()
         {
             var requestData = WopiRequest.ParseRequest(_request);
-            if (!ValidationHelper.ValidateAccess(requestData.AccessToken, writeAccessRequired: true))
-            {
-                return new WopiResponse() { ResponseType = WopiResponseType.InvalidToken, Message = "Invalid Token" };
-            }
-
             var documentId = Convert.ToInt64(requestData.Id);
             var document = FB.GetDocument(documentId);
 

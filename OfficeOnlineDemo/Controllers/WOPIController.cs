@@ -23,6 +23,14 @@ namespace OfficeOnlineDemo.Controllers
             if (!ValidateWopiProofKey(Request))
             {
                 HandleResponse(new WopiResponse() { ResponseType = WopiResponseType.ServerError, Message = "Invalid Proof Key" });
+                context.Result = new HttpStatusCodeResult(Response.StatusCode, Response.StatusDescription);
+            }
+
+            var requestData = WopiRequest.ParseRequest(Request);
+            if (!FB.ValidateAccessToken(Request.QueryString["access_token"], Convert.ToInt64(requestData.Id)))
+            {
+                HandleResponse(new WopiResponse() { ResponseType = WopiResponseType.InvalidToken, Message = "Invalid Token" });
+                context.Result = new HttpStatusCodeResult(Response.StatusCode, Response.StatusDescription);
             }
 
             base.OnActionExecuting(context);
@@ -46,14 +54,25 @@ namespace OfficeOnlineDemo.Controllers
             HandleResponse(new Handlers.PutFile(Request).Handle());
         }
 
-        public JsonResult Post(string file_id, string access_token, string access_token_ttl)
+        public ActionResult Post(string file_id, string access_token, string access_token_ttl)
         {
             var wopiOverride = Request.Headers["X-WOPI-Override"];
             switch (wopiOverride)
             {
                 case "PUT_RELATIVE":
-                    //https://wopirest.readthedocs.io/en/latest/files/PutRelativeFile.html#putrelativefile
-                    break;
+                    //HandleJsonResponse(new Handlers.PutRelative(Request).Handle());
+                    var response = new Handlers.PutRelative(Request).Handle();
+                    Response.StatusCode = response.StatusCode;
+
+                    if (response.StatusCode != 200)
+                    {
+
+                        break;
+                    }
+                    else
+                    {
+                        return Json(response.Json, JsonRequestBehavior.AllowGet);
+                    }
                 case "GET_SHARE_URL":
                     //https://wopirest.readthedocs.io/en/latest/files/GetShareUrl.html?highlight=getshareurl
                     Response.StatusCode = 501;
@@ -132,7 +151,7 @@ namespace OfficeOnlineDemo.Controllers
             }
 
         }
-
+       
         private void ReturnStatus(int code, string description)
         {
             Response.StatusCode = code;

@@ -1,5 +1,4 @@
-﻿using OfficeOnlineDemo.Helpers;
-using OfficeOnlineDemo.Interfaces;
+﻿using OfficeOnlineDemo.Interfaces;
 using OfficeOnlineDemo.Models;
 using System;
 using System.IO;
@@ -17,13 +16,9 @@ namespace OfficeOnlineDemo.Handlers
             _request = request;
         }
 
-        public WopiResponse Handle()//ref HttpResponseBase response
+        public WopiResponse Handle()
         {
             var requestData = WopiRequest.ParseRequest(_request);
-            if (!ValidationHelper.ValidateAccess(requestData.AccessToken, writeAccessRequired: true))
-            {
-                return new WopiResponse() { ResponseType = WopiResponseType.InvalidToken, Message = "Invalid Token" };
-            }
 
             try
             {

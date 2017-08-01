@@ -2,7 +2,6 @@
 using System;
 using System.Web;
 using OfficeOnlineDemo.Models;
-using OfficeOnlineDemo.Helpers;
 using FB = FileBoundHelper.Helper;
 
 
@@ -20,11 +19,6 @@ namespace OfficeOnlineDemo.Handlers
         public WopiResponse Handle()
         {
             var requestData = WopiRequest.ParseRequest(_request);
-            if (!ValidationHelper.ValidateAccess(requestData.AccessToken, writeAccessRequired: true))
-            {
-                return new WopiResponse() { ResponseType = WopiResponseType.InvalidToken, Message = "Invalid Token" };
-            }
-
             var documentId = Convert.ToInt64(requestData.Id);
             var document = FB.GetDocument(documentId);
 

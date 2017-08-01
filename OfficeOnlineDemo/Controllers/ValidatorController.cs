@@ -1,6 +1,8 @@
-﻿using OfficeOnlineDemo.Models;
+﻿using OfficeOnlineDemo.Helpers;
+using OfficeOnlineDemo.Models;
 using System;
 using System.Web.Mvc;
+using FB = FileBoundHelper.Helper;
 
 namespace OfficeOnlineDemo.Controllers
 {
@@ -21,7 +23,7 @@ namespace OfficeOnlineDemo.Controllers
 
             return View(new EditDocumentModel()
             {
-                AccessToken = "asdfasdfasdf",
+                AccessToken = FB.GetAccessToken(id),
                 AccessTokenExpires = tokenExpires,
                 ActionUrl = GetValidatorUrl(id)
             });
@@ -29,9 +31,6 @@ namespace OfficeOnlineDemo.Controllers
 
         private string GetValidatorUrl(long documentId)
         {
-
-            var wopi_api = "http://wopi-api.azurewebsites.net/";
-
             var business_user = 1; // 1 means user is a business user
             var ui_llcc = "en-US";
             var dc_llcc = "en-US";
@@ -41,7 +40,7 @@ namespace OfficeOnlineDemo.Controllers
 
             var url = $"https://onenote.officeapps-df.live.com/hosting/WopiTestFrame.aspx?ui={ui_llcc}&rs={dc_llcc}&dchat={disable_chat}&hid={host_session_id}&IsLicensedUser={business_user}&testcategory={test_category}";
 
-            url += $"&WOPIsrc={wopi_api}wopi/files/" + documentId.ToString();
+            url += $"&WOPIsrc={Constants.WopiApiUrl}wopi/files/" + documentId.ToString();
 
             return url;
         }
