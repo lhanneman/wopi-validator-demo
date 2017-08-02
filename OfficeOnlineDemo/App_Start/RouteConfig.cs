@@ -9,6 +9,7 @@ namespace OfficeOnlineDemo
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.MapRoute("editOnline", "edit/{id}", new { controller = "Edit", action = "Index" }, new { httpMethod = new HttpMethodConstraint("GET") });
             routes.MapRoute("validator", "validator/{id}", new { controller = "Validator", action = "Index" }, new { httpMethod = new HttpMethodConstraint("GET") });
 
             routes.MapRoute("get_file_contents", "wopi/files/{file_id}/contents", new { controller = "WOPI", action = "GetFile" }, new { httpMethod = new HttpMethodConstraint("GET") });

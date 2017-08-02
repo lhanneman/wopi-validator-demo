@@ -45,10 +45,11 @@
   <ItemGroup>
     <Reference Include="FileBound, Version=7.3.5.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\FileBound.dll</HintPath>
+      <HintPath>..\..\..\Users\lloyd\Desktop\dlls\FileBound.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\FileBoundHelper\bin\Release\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Users\lloyd\Desktop\dlls\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.3\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -131,6 +132,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\EditController.cs" />
     <Compile Include="Controllers\ValidatorController.cs" />
     <Compile Include="Controllers\WOPIController.cs" />
     <Compile Include="Global.asax.cs">
@@ -164,6 +166,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Validator\Index.cshtml" />
+    <Content Include="Views\Edit\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

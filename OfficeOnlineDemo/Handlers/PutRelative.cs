@@ -51,21 +51,16 @@ namespace OfficeOnlineDemo.Handlers
 
                 var overwriteExisting = !string.IsNullOrEmpty(overwriteRelative) && overwriteRelative.ToLower().Equals("true");
 
-                try
+                if (!overwriteExisting && FB.DocumentExists(responseData.Name, extension, documentId))
                 {
-                    if (!overwriteExisting && FB.DocumentExists(responseData.Name, extension, documentId))
+                    // no change
+                    responseData.Url = $"{Constants.WopiApiUrl}wopi/files/{documentId}?access_code={requestData.AccessToken}";
+                    return new WopiJsonResponse()
                     {
-                        return new WopiJsonResponse()
-                        {
-                            StatusCode = 409,
-                            Json = new PutRelativeResponse()
-                        };
+                        StatusCode = 409,
+                        Json = responseData
+                    };
 
-                    }
-                }
-                catch (Exception ex)
-                {
-                    var i = 0;
                 }
             }
             else
@@ -88,7 +83,6 @@ namespace OfficeOnlineDemo.Handlers
 
 
             var newDocumentId = FB.SaveNewDocument(binary, extension, responseData.Name, documentId);
-            //$"&WOPIsrc={Constants.WopiApiUrl}wopi/files/" + documentId.ToString();
             var access_code = FB.GetAccessToken(newDocumentId);
             responseData.Url = $"{Constants.WopiApiUrl}wopi/files/{newDocumentId}?access_code={access_code}";
 

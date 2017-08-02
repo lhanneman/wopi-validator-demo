@@ -1,6 +1,8 @@
-﻿using OfficeOnlineDemo.Models;
+﻿using Newtonsoft.Json;
+using OfficeOnlineDemo.Models;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using FB = FileBoundHelper.Helper;
@@ -54,7 +56,7 @@ namespace OfficeOnlineDemo.Controllers
             HandleResponse(new Handlers.PutFile(Request).Handle());
         }
 
-        public ActionResult Post(string file_id, string access_token, string access_token_ttl)
+        public ContentResult Post(string file_id, string access_token, string access_token_ttl)
         {
             var wopiOverride = Request.Headers["X-WOPI-Override"];
             switch (wopiOverride)
@@ -64,14 +66,15 @@ namespace OfficeOnlineDemo.Controllers
                     var response = new Handlers.PutRelative(Request).Handle();
                     Response.StatusCode = response.StatusCode;
 
-                    if (response.StatusCode != 200)
+                    if (response.StatusCode >= 500)
                     {
 
                         break;
                     }
                     else
                     {
-                        return Json(response.Json, JsonRequestBehavior.AllowGet);
+                        //return Json(response.Json, JsonRequestBehavior.AllowGet);
+                        return GetJson(response.Json);
                     }
                 case "GET_SHARE_URL":
                     //https://wopirest.readthedocs.io/en/latest/files/GetShareUrl.html?highlight=getshareurl
@@ -90,10 +93,11 @@ namespace OfficeOnlineDemo.Controllers
                     break;
                 default:
                     // CheckFileInfo: https://wopirest.readthedocs.io/en/latest/files/CheckFileInfo.html#checkfileinfo
-                    return Json(new CheckFileInfoResponse().InitializeValidatorParams(file_id, access_token, access_token_ttl), JsonRequestBehavior.AllowGet);
+                    //return Json(new CheckFileInfoResponse().InitializeValidatorParams(file_id, access_token, access_token_ttl), JsonRequestBehavior.AllowGet);
+                    return GetJson(new CheckFileInfoResponse().InitializeValidatorParams(file_id, access_token, access_token_ttl));
             }
 
-            return null;
+            return new ContentResult() { Content = "test", ContentType = "text/plain" };
         }
 
         /// <summary>
@@ -156,6 +160,16 @@ namespace OfficeOnlineDemo.Controllers
         {
             Response.StatusCode = code;
             Response.StatusDescription = description;
+        }
+
+        private ContentResult GetJson(object data)
+        {
+            return new ContentResult
+            {
+                ContentType = "application/json",
+                Content = JsonConvert.SerializeObject(data),//, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }
+                ContentEncoding = Encoding.UTF8,
+            };
         }
     }
 }
