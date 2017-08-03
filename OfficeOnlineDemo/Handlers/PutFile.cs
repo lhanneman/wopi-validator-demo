@@ -1,4 +1,5 @@
-﻿using OfficeOnlineDemo.Interfaces;
+﻿using OfficeOnlineDemo.Helpers;
+using OfficeOnlineDemo.Interfaces;
 using OfficeOnlineDemo.Models;
 using System;
 using System.IO;
@@ -30,16 +31,10 @@ namespace OfficeOnlineDemo.Handlers
                     return new WopiResponse() { ResponseType = WopiResponseType.FileUnknown, Message = "File not found" };
                 }
 
-                string newLock = _request.Headers[WopiHeaders.Lock];
-
-                var currentLockInfo = FB.GetLockInfo(document);
-                var currentLock = !string.IsNullOrEmpty(currentLockInfo)
-                                    ? Newtonsoft.Json.JsonConvert.DeserializeObject<LockInfo>(currentLockInfo)
-                                    : null;
-
-                if (currentLock != null && (currentLock.Lock != newLock))
+                var currentLock = "";
+                if (LockHelper.IsLockMismatch(_request, document, out currentLock))
                 {
-                    return new WopiResponse() { ResponseType = WopiResponseType.LockMismatch, Message = currentLock.Lock };
+                    return new WopiResponse() { ResponseType = WopiResponseType.LockMismatch, Message = currentLock };
                 }
 
                 // FileInfo putTargetFileInfo = new FileInfo(requestData.FullPath);
@@ -56,14 +51,7 @@ namespace OfficeOnlineDemo.Handlers
                 // Either the file has a valid lock that matches the lock in the request, or the file is unlocked
                 // and is zero bytes.  Either way, proceed with the PutFile.
 
-                _request.InputStream.Position = 0;
-                byte[] binary;
-                using (var ms = new MemoryStream())
-                {
-                    _request.InputStream.CopyTo(ms);
-                    binary = ms.ToArray();
-                }
-
+                var binary = IOHelper.StreamToBytes(_request.InputStream);
                 FB.SaveDocument(document, binary);
             }
             catch (UnauthorizedAccessException uex)

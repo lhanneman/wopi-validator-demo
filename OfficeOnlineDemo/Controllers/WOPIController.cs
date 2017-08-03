@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OfficeOnlineDemo.Models;
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Web;
 using System.Web.Mvc;
 using FB = FileBoundHelper.Helper;
 
@@ -11,23 +9,11 @@ namespace OfficeOnlineDemo.Controllers
 {
     public class WOPIController : Controller
     {
-
-        /// <summary>
-        /// Simplified Lock info storage.
-        /// A real lock implementation would use persised storage for locks.
-        /// </summary>
-        private static readonly Dictionary<string, LockInfo> Locks = new Dictionary<string, LockInfo>();
+        // required endpoints:
+        // https://wopi.readthedocs.io/en/latest/wopi_requirements.html#requirements
 
         protected override void OnActionExecuting(ActionExecutingContext context)
         {
-            // WOPI ProofKey validation is an optional way that a WOPI host can ensure that the request
-            // is coming from the Office Online server that they expect to be talking to.
-            if (!ValidateWopiProofKey(Request))
-            {
-                HandleResponse(new WopiResponse() { ResponseType = WopiResponseType.ServerError, Message = "Invalid Proof Key" });
-                context.Result = new HttpStatusCodeResult(Response.StatusCode, Response.StatusDescription);
-            }
-
             var requestData = WopiRequest.ParseRequest(Request);
             if (!FB.ValidateAccessToken(Request.QueryString["access_token"], Convert.ToInt64(requestData.Id)))
             {
@@ -37,9 +23,6 @@ namespace OfficeOnlineDemo.Controllers
 
             base.OnActionExecuting(context);
         }
-
-        // required endpoints:
-        // https://wopi.readthedocs.io/en/latest/wopi_requirements.html#requirements
 
         // GetFile: https://wopirest.readthedocs.io/en/latest/files/GetFile.html#getfile
         [HttpGet]
@@ -62,26 +45,13 @@ namespace OfficeOnlineDemo.Controllers
             switch (wopiOverride)
             {
                 case "PUT_RELATIVE":
-                    //HandleJsonResponse(new Handlers.PutRelative(Request).Handle());
-                    var response = new Handlers.PutRelative(Request).Handle();
-                    Response.StatusCode = response.StatusCode;
-
-                    if (response.StatusCode >= 500)
-                    {
-
-                        break;
-                    }
-                    else
-                    {
-                        //return Json(response.Json, JsonRequestBehavior.AllowGet);
-                        return GetJson(response.Json);
-                    }
+                    return HandleJsonResponse(new Handlers.PutRelative(Request).Handle());
                 case "GET_SHARE_URL":
                     //https://wopirest.readthedocs.io/en/latest/files/GetShareUrl.html?highlight=getshareurl
                     Response.StatusCode = 501;
                     //return Json(new { ShareUrl = "http://wopi-api.azurewebsites.net/oos/share" });
                     break;
-                
+
                 case "LOCK":
                     HandleResponse(new Handlers.Lock(Request).Handle());
                     break;
@@ -91,47 +61,40 @@ namespace OfficeOnlineDemo.Controllers
                 case "REFRESH_LOCK":
                     HandleResponse(new Handlers.Lock(Request).HandleRefresh());
                     break;
+                case "DELETE":
+                    HandleResponse(new Handlers.Delete(Request).Handle());
+                    break;
+                case "RENAME_FILE":
+                    return HandleJsonResponse(new Handlers.Rename(Request).Handle());
                 default:
                     // CheckFileInfo: https://wopirest.readthedocs.io/en/latest/files/CheckFileInfo.html#checkfileinfo
-                    //return Json(new CheckFileInfoResponse().InitializeValidatorParams(file_id, access_token, access_token_ttl), JsonRequestBehavior.AllowGet);
                     return GetJson(new CheckFileInfoResponse().InitializeValidatorParams(file_id, access_token, access_token_ttl));
             }
 
-            return new ContentResult() { Content = "test", ContentType = "text/plain" };
+            return new ContentResult() { Content = "did not handle action: " + wopiOverride, ContentType = "text/plain" };
         }
 
-        /// <summary>
-        /// Validate WOPI ProofKey to make sure request came from the expected Office Web Apps Server.
-        /// </summary>
-        /// <param name="request">Request information</param>
-        /// <returns>true when WOPI ProofKey validation succeeded, false otherwise.</returns>
-        private static bool ValidateWopiProofKey(HttpRequestBase request)
+        private ContentResult HandleJsonResponse(WopiJsonResponse jsonResponse)
         {
-            // TODO: WOPI proof key validation is not implemented in this sample.
-            // For more details on proof keys, see the documentation
-            // https://wopi.readthedocs.io/en/latest/scenarios/proofkeys.html
+            Response.StatusCode = jsonResponse.StatusCode;
 
-            // The proof keys are returned by WOPI Discovery. For more details, see
-            // https://wopi.readthedocs.io/en/latest/discovery.html
+            if (jsonResponse.Headers.Count > 0)
+            {
+                Response.Headers.Add(jsonResponse.Headers);
+            }
 
-            var proof = request.Headers["X-WOPI-Proof"];
-            var proofOld = request.Headers["X-WOPI-ProofOld"];
-            var timestamp = Convert.ToInt64(request.Headers["X-WOPI-TimeStamp"]);
-            //var accessToken = request.Headers["Authorization"].Replace("Bearer ", "");
-            //var url = request.Url.ToString();
-            //var currentKeyInfo = new KeyInfo();
-            //var oldKeyInfo = new KeyInfo();
-            //var helper = new ProofKeysHelper(currentKeyInfo, oldKeyInfo);
-            //var input = new ProofKeyValidationInput(accessToken, timestamp, url, proof, proofOld);
-            //return helper.Validate(input);
-            //return true;
+            if (jsonResponse.StatusCode >= 500)
+            {
+                return new ContentResult() { Content = jsonResponse.ErrorMessage, ContentType = "text/plain" };
+            }
 
-            return proof != proofOld && !WopiRequest.TimestampOlderThan20Min(timestamp);
+            return GetJson(jsonResponse.Json);
         }
 
         private void HandleResponse(WopiResponse response)
         {
-            switch (response.ResponseType) {
+            switch (response.ResponseType)
+            {
                 case WopiResponseType.ServerError:
                     ReturnStatus(500, response.Message);
                     break;
@@ -155,7 +118,7 @@ namespace OfficeOnlineDemo.Controllers
             }
 
         }
-       
+
         private void ReturnStatus(int code, string description)
         {
             Response.StatusCode = code;
@@ -167,7 +130,7 @@ namespace OfficeOnlineDemo.Controllers
             return new ContentResult
             {
                 ContentType = "application/json",
-                Content = JsonConvert.SerializeObject(data),//, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }
+                Content = JsonConvert.SerializeObject(data),
                 ContentEncoding = Encoding.UTF8,
             };
         }

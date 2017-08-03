@@ -21,7 +21,7 @@ namespace OfficeOnlineDemo.Controllers
                     new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             ).TotalMilliseconds);
 
-            return View(new EditDocumentModel()
+            return View("WopiFrame", new EditDocumentModel()
             {
                 AccessToken = FB.GetAccessToken(id),
                 AccessTokenExpires = tokenExpires,

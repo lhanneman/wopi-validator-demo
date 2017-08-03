@@ -138,12 +138,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Handlers\Delete.cs" />
     <Compile Include="Handlers\Lock.cs" />
     <Compile Include="Handlers\PutFile.cs" />
     <Compile Include="Handlers\PutRelative.cs" />
+    <Compile Include="Handlers\Rename.cs" />
     <Compile Include="Handlers\Unlock.cs" />
     <Compile Include="Helpers\Constants.cs" />
-    <Compile Include="Helpers\ProofHelper.cs" />
+    <Compile Include="Helpers\IOHelper.cs" />
+    <Compile Include="Helpers\LockHelper.cs" />
     <Compile Include="Interfaces\IWopiHandler.cs" />
     <Compile Include="Interfaces\IWopiJsonHandler.cs" />
     <Compile Include="Models\CheckFileInfoResponse.cs" />
@@ -152,6 +155,7 @@
     <Compile Include="Models\LockInfo.cs" />
     <Compile Include="Models\ProofKeyValidationInput.cs" />
     <Compile Include="Models\PutRelativeResponse.cs" />
+    <Compile Include="Models\RenameResponse.cs" />
     <Compile Include="Models\WopiResponse.cs" />
     <Compile Include="Models\WopiRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -165,8 +169,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-    <Content Include="Views\Validator\Index.cshtml" />
-    <Content Include="Views\Edit\Index.cshtml" />
+    <Content Include="Views\Shared\WopiFrame.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

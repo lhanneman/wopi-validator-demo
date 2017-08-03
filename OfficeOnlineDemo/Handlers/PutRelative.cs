@@ -2,7 +2,6 @@
 using OfficeOnlineDemo.Models;
 using System.Web;
 using FB = FileBoundHelper.Helper;
-using System.IO;
 using OfficeOnlineDemo.Helpers;
 using System;
 
@@ -24,8 +23,6 @@ namespace OfficeOnlineDemo.Handlers
             var responseData = new PutRelativeResponse();
 
             var documentId = Convert.ToInt64(requestData.Id);
-            // can be called on locked file, so lock header is not present
-
             var relativeTarget = _request.Headers[WopiHeaders.RelativeTarget];
             var suggestedTarget = _request.Headers[WopiHeaders.SuggestedTarget];
 
@@ -47,55 +44,51 @@ namespace OfficeOnlineDemo.Handlers
                 // check if we have a file matching the target name
                 // and if so, return 409 conflict w/ lock response
                 extension = relativeTarget.Substring(relativeTarget.LastIndexOf(".") + 1);
-                responseData.Name = Utf7Encode(relativeTarget); // extension should already be here, we just need to get it for below
+                responseData.Name = IOHelper.Utf7Encode(relativeTarget); // extension should already be here, we just need to get it for below
 
                 var overwriteExisting = !string.IsNullOrEmpty(overwriteRelative) && overwriteRelative.ToLower().Equals("true");
+                var relativeDocument = FB.GetDocumentByNameAndExtension(responseData.Name, extension, documentId);
 
-                if (!overwriteExisting && FB.DocumentExists(responseData.Name, extension, documentId))
+                // does this document already exist?
+                if (relativeDocument != null)
                 {
-                    // no change
-                    responseData.Url = $"{Constants.WopiApiUrl}wopi/files/{documentId}?access_code={requestData.AccessToken}";
-                    return new WopiJsonResponse()
+                    // lock check - make sure the existing document isn't locked:
+                    var currentLock = "";
+                    if (LockHelper.IsLockMismatch(_request, relativeDocument, out currentLock))
                     {
-                        StatusCode = 409,
-                        Json = responseData
-                    };
+                        return new WopiJsonResponse() { StatusCode = 409, Json = responseData };
+                    }
+
+                    // not locked - but the document exists, so make sure the overwrite existing header is set:
+                    if (!overwriteExisting)
+                    {
+                        return new WopiJsonResponse()
+                        {
+                            StatusCode = 409,
+                            Json = responseData
+                        };
+                    }
 
                 }
             }
             else
             {
                 // suggested mode:
+                // save the file with whatever name we want, and return that name:
                 extension = suggestedTarget.Substring(suggestedTarget.LastIndexOf(".") + 1);
                 responseData.Name = "wopitest_putrelative." + extension;
-
-
-                // save the file with whatever name we want, and return that name:
             }
 
-            _request.InputStream.Position = 0;
-            byte[] binary;
-            using (var ms = new MemoryStream())
-            {
-                _request.InputStream.CopyTo(ms);
-                binary = ms.ToArray();
-            }
-
-
+            var binary = IOHelper.StreamToBytes(_request.InputStream);
             var newDocumentId = FB.SaveNewDocument(binary, extension, responseData.Name, documentId);
-            var access_code = FB.GetAccessToken(newDocumentId);
-            responseData.Url = $"{Constants.WopiApiUrl}wopi/files/{newDocumentId}?access_code={access_code}";
+            var newToken = FB.GetAccessToken(newDocumentId);
+            responseData.Url = $"{Constants.WopiApiUrl}wopi/files/{newDocumentId}?access_token={newToken}";
 
             return new WopiJsonResponse()
             {
                 StatusCode = 200,
                 Json = responseData
             };
-        }
-
-        private string Utf7Encode(string value)
-        {
-            return System.Text.Encoding.UTF7.GetString(System.Text.Encoding.ASCII.GetBytes(value));
         }
 
         public enum PutRelativeMode

@@ -42,6 +42,9 @@ namespace OfficeOnlineDemo.Models
         public const string SuggestedTarget = "X-WOPI-SuggestedTarget";
         public const string RelativeTarget = "X-WOPI-RelativeTarget";
         public const string OverwriteRelativeTarget = "X-WOPI-OverwriteRelativeTarget";
+
+        public const string RequestedName = "X-WOPI-RequestedName";
+        public const string InvalidFileNameError = "X-WOPI-InvalidFileNameError ";
     }
 
     public class WopiRequest

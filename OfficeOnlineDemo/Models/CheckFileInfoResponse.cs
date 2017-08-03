@@ -9,7 +9,7 @@ namespace OfficeOnlineDemo.Models
     public class CheckFileInfoResponse
     {
 
-        public CheckFileInfoResponse InitializeValidatorParams(string file_id, string access_code, string access_code_ttl)
+        public CheckFileInfoResponse InitializeValidatorParams(string file_id, string access_token, string access_token_ttl)
         {
             var documentId = Convert.ToInt64(file_id);
             var document = FB.GetDocument(documentId);
