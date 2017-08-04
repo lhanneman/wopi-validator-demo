@@ -37,10 +37,6 @@
     </style>
 </head>
 <body>
-
-    <div>Token: @Model.AccessToken</div>
-    <div>Expires: @Model.AccessTokenExpires</div>
-
     <form id="office_form" name="office_form" target="office_frame" action="@Model.ActionUrl" method="post">
         <input name="access_token" value="@Model.AccessToken" type="hidden" />
         <input name="access_token_ttl" value="@Model.AccessTokenExpires" type="hidden" />
