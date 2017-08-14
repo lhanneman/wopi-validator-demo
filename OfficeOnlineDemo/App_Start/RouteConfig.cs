@@ -11,6 +11,8 @@ namespace OfficeOnlineDemo
 
             routes.MapRoute("editWord", "edit/word/{id}", new { controller = "Edit", action = "EditWord" }, new { httpMethod = new HttpMethodConstraint("GET") });
             routes.MapRoute("editExcel", "edit/excel/{id}", new { controller = "Edit", action = "EditExcel" }, new { httpMethod = new HttpMethodConstraint("GET") });
+            routes.MapRoute("editPpt", "edit/powerpoint/{id}", new { controller = "Edit", action = "EditPowerpoint" }, new { httpMethod = new HttpMethodConstraint("GET") });
+
 
             routes.MapRoute("validator", "validator/{id}", new { controller = "Validator", action = "Index" }, new { httpMethod = new HttpMethodConstraint("GET") });
 

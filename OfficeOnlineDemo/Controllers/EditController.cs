@@ -31,6 +31,16 @@ namespace OfficeOnlineDemo.Controllers
             });
         }
 
+        public ActionResult EditPowerpoint(long id) //701
+        {
+            return View("WopiFrame", new EditDocumentModel()
+            {
+                AccessToken = FB.GetAccessToken(id),
+                AccessTokenExpires = GetTokenExpires(),
+                ActionUrl = GetEditPowerpointUrl(id)
+            });
+        }
+
         private string GetEditWordUrl(long documentId)
         {
             var business_user = 1; // 1 means user is a business user
@@ -58,6 +68,25 @@ namespace OfficeOnlineDemo.Controllers
 
             var url = $"https://excel.officeapps-df.live.com/x/_layouts/xlviewerinternal.aspx?edit=1&ui={ui_llcc}&rs={dc_llcc}&dchat={disable_chat}&hid={host_session_id}&IsLicensedUser={business_user}&testcategory={test_category}";
             //var url = $"https://excel.officeapps-df.live.com/x/_layouts/xlviewerinternal.aspx?edit=1&<ui=UI_LLCC&><rs=DC_LLCC&><dchat=DISABLE_CHAT&><hid=HOST_SESSION_ID&><IsLicensedUser=BUSINESS_USER&>"
+
+            url += $"&WOPIsrc={Constants.WopiApiUrl}wopi/files/" + documentId.ToString();
+
+            return url;
+        }
+
+        private string GetEditPowerpointUrl(long documentId)
+        {
+            var business_user = 1; // 1 means user is a business user
+            var ui_llcc = "en-US";
+            var dc_llcc = "en-US";
+            var disable_chat = 1;
+            var host_session_id = Guid.NewGuid().ToString();
+            //var test_category = "OfficeOnline"; // could be All or OfficeNativeClient for iOS stuff
+            var activity_nav_id = "";
+            var activity_type = "";
+
+            var url = $"https://powerpoint.officeapps-df.live.com/p/PowerPointFrame.aspx?PowerPointView=EditView&ui={ui_llcc}&rs={dc_llcc}&dchat={disable_chat}&hid={host_session_id}&IsLicensedUser={business_user}&actnavid={activity_nav_id}&acttype={activity_type}";
+            //var url = https://powerpoint.officeapps-df.live.com/p/PowerPointFrame.aspx?PowerPointView=EditView&<ui=UI_LLCC&><rs=DC_LLCC&><dchat=DISABLE_CHAT&><hid=HOST_SESSION_ID&><IsLicensedUser=BUSINESS_USER&><actnavid=ACTIVITY_NAVIGATION_ID&><acttype=ACTIVITY_TYPE&>
 
             url += $"&WOPIsrc={Constants.WopiApiUrl}wopi/files/" + documentId.ToString();
 
